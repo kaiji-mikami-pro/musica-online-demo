@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musica Online — マイページ</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400&family=Montserrat:wght@300;400;500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#1a1410;--ivory:#f5f0e8;--cream:#ede6d6;
+    --gold:#b8963e;--gold-light:#d4ae5c;--muted:#7a6f62;
+    --border:rgba(184,150,62,0.22);--success:#3a7d5c;
+    --sw:240px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#f0ebe0;color:var(--ink);font-family:'Noto Serif JP',serif;font-weight:300;min-height:100vh;display:flex;}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sw);background:var(--ink);min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform 0.3s ease;}
+  .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(184,150,62,0.18);}
+  .sidebar-logo-text{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--ivory);letter-spacing:0.06em;}
+  .sidebar-logo-text span{color:var(--gold);}
+  .sidebar-logo-sub{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(245,240,232,0.3);margin-top:3px;}
+  .sidebar-user{padding:18px 24px;border-bottom:1px solid rgba(184,150,62,0.1);display:flex;align-items:center;gap:10px;}
+  .user-avatar{width:38px;height:38px;border-radius:50%;background:rgba(184,150,62,0.2);border:1px solid rgba(184,150,62,0.35);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gold-light);flex-shrink:0;}
+  .user-name{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--ivory);line-height:1.2;}
+  .user-role{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+  .sidebar-nav{padding:14px 0;flex:1;overflow-y:auto;}
+  .nav-section-label{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(245,240,232,0.22);padding:8px 24px 3px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 24px;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:0.07em;color:rgba(245,240,232,0.48);cursor:pointer;transition:all 0.2s;text-decoration:none;border-left:2px solid transparent;}
+  .nav-item:hover{color:var(--ivory);background:rgba(255,255,255,0.04);}
+  .nav-item.active{color:var(--gold-light);background:rgba(184,150,62,0.08);border-left-color:var(--gold);}
+  .sidebar-bottom{padding:16px 24px;border-top:1px solid rgba(184,150,62,0.1);}
+  .sidebar-bottom a{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.28);text-decoration:none;display:block;margin-bottom:7px;transition:color 0.2s;}
+  .sidebar-bottom a:hover{color:var(--gold);}
+
+  /* MOBILE NAV */
+  .mobile-nav{display:none;position:fixed;top:0;left:0;right:0;z-index:150;background:var(--ink);padding:14px 20px;border-bottom:1px solid rgba(184,150,62,0.18);align-items:center;justify-content:space-between;}
+  .mobile-logo{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--ivory);}
+  .mobile-logo span{color:var(--gold);}
+  .hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px;}
+  .hamburger span{display:block;width:22px;height:1.5px;background:rgba(245,240,232,0.7);transition:all 0.3s;}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:190;}
+
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .mobile-nav{display:flex;}
+    .sidebar-overlay.show{display:block;}
+    body{flex-direction:column;}
+    .main{margin-left:0!important;padding-top:64px;}
+  }
+
+  /* MAIN */
+  .main{flex:1;padding:36px 32px;margin-left:var(--sw);}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+  .page-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;line-height:1.2;}
+  .page-subtitle{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+  .header-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ivory);background:var(--ink);border:none;padding:11px 24px;cursor:pointer;transition:background 0.2s;text-decoration:none;display:inline-block;white-space:nowrap;}
+  .header-btn:hover{background:var(--gold);}
+
+  /* STATS */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .stat-card{background:var(--ivory);border:1px solid var(--border);padding:20px;}
+  .stat-card-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;line-height:1;}
+  .stat-card-num.gold{color:var(--gold);}
+  .stat-card-label{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+  @media(max-width:680px){.stats-row{grid-template-columns:1fr 1fr;}}
+  @media(max-width:400px){.stats-row{grid-template-columns:1fr;}}
+
+  /* CARDS */
+  .card{background:var(--ivory);border:1px solid var(--border);padding:24px;margin-bottom:20px;}
+  .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;}
+  .card-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;}
+  .badge{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;padding:3px 10px;}
+  .badge-gold{color:#7a5a10;background:#f5e4b0;}
+  .badge-green{color:#1f5a3a;background:#c8e8d8;}
+  .badge-muted{color:var(--muted);background:var(--cream);}
+  .badge-blue{color:#1a3a6a;background:#d0e4f8;}
+
+  /* TABLE */
+  .table{width:100%;border-collapse:collapse;}
+  .table th{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 14px 10px 0;border-bottom:1px solid var(--border);}
+  .table td{padding:12px 14px 12px 0;border-bottom:1px solid rgba(184,150,62,0.08);font-size:12px;vertical-align:middle;}
+  .table tr:last-child td{border-bottom:none;}
+  .entry-name{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:400;}
+  .entry-meta{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.09em;color:var(--muted);margin-top:2px;}
+  .score-bar-wrap{display:flex;align-items:center;gap:8px;}
+  .score-bar{flex:1;height:2px;background:var(--cream);overflow:hidden;min-width:40px;}
+  .score-bar-fill{height:100%;background:var(--gold);}
+  .score-num{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;min-width:32px;text-align:right;}
+  .action-link{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:color 0.2s;white-space:nowrap;}
+  .action-link:hover{color:var(--ink);}
+  @media(max-width:600px){
+    .table th:nth-child(2),.table td:nth-child(2){display:none;}
+    .main{padding:20px 16px;}
+  }
+
+  /* UPLOAD */
+  .upload-area{border:2px dashed var(--border);padding:44px 24px;text-align:center;cursor:pointer;transition:all 0.25s;background:rgba(184,150,62,0.02);}
+  .upload-area:hover,.upload-area.drag-over{border-color:var(--gold);background:rgba(184,150,62,0.05);}
+  .upload-icon{font-size:32px;margin-bottom:12px;display:block;color:var(--gold);opacity:0.7;}
+  .upload-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;margin-bottom:6px;}
+  .upload-desc{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.09em;color:var(--muted);margin-bottom:20px;line-height:1.8;}
+  .upload-formats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;}
+  .format-tag{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.13em;color:var(--muted);background:var(--cream);padding:3px 9px;}
+  .btn-upload{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ivory);background:var(--ink);border:none;padding:12px 30px;cursor:pointer;transition:background 0.2s;}
+  .btn-upload:hover{background:var(--gold);}
+  input[type="file"]{display:none;}
+  .form-section{display:none;}
+  .form-section.visible{display:block;}
+  .form-divider{height:1px;background:var(--border);margin:24px 0;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-group.full{grid-column:1/-1;}
+  .form-label{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+  .form-input,.form-select,.form-textarea{background:var(--cream);border:1px solid var(--border);padding:10px 14px;font-family:'Noto Serif JP',serif;font-size:12px;color:var(--ink);transition:border-color 0.2s;outline:none;width:100%;}
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);}
+  .form-textarea{resize:vertical;min-height:80px;}
+  .form-select{appearance:none;cursor:pointer;}
+  .upload-progress{display:none;}
+  .upload-progress.visible{display:block;}
+  .progress-wrap{background:var(--cream);height:3px;overflow:hidden;margin-top:14px;}
+  .progress-bar-fill{height:100%;background:var(--gold);width:0%;transition:width 0.3s ease;}
+  .progress-label{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.09em;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between;}
+  @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+
+  /* FEEDBACK */
+  .feedback-item{border-left:2px solid var(--gold);padding:14px 18px;background:rgba(184,150,62,0.04);margin-bottom:10px;}
+  .feedback-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+  .feedback-judge{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);}
+  .feedback-date{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.09em;color:var(--muted);}
+  .feedback-text{font-size:12px;line-height:1.9;color:var(--ink);}
+
+  /* CERT DOWNLOAD (mypage only) */
+  .cert-download-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(184,150,62,0.06);border:1px solid rgba(184,150,62,0.2);margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .cert-download-info{font-family:'Cormorant Garamond',serif;font-size:16px;}
+  .cert-download-meta{font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-top:2px;}
+  .cert-dl-btn-sm{font-family:'Montserrat',sans-serif;font-size:8px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:none;padding:8px 18px;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .cert-dl-btn-sm:hover{background:var(--gold-light);}
+
+  /* CERT OVERLAY */
+  .cert-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,8,6,0.88);align-items:center;justify-content:center;backdrop-filter:blur(8px);padding:20px;}
+  .cert-overlay.show{display:flex;}
+  .cert-wrapper{position:relative;max-width:700px;width:100%;}
+  .cert-close{position:absolute;top:-34px;right:0;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,240,232,0.4);cursor:pointer;transition:color 0.2s;background:none;border:none;}
+  .cert-close:hover{color:var(--ivory);}
+  .cert-actions{display:flex;gap:10px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap;}
+  .cert-dl-btn{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:none;padding:11px 22px;cursor:pointer;transition:all 0.2s;}
+  .cert-dl-btn:hover{background:var(--gold-light);}
+  .cert-share-btn{font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(245,240,232,0.5);background:transparent;border:1px solid rgba(255,255,255,0.15);padding:11px 22px;cursor:pointer;transition:all 0.2s;}
+  .cert-share-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+  /* CERTIFICATE */
+  #certificate{width:100%;background:#faf6ee;position:relative;overflow:hidden;aspect-ratio:1.414/1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5% 8%;}
+  #certificate::before{content:'';position:absolute;inset:14px;border:1px solid rgba(184,150,62,0.35);pointer-events:none;}
+  #certificate::after{content:'';position:absolute;inset:20px;border:1px solid rgba(184,150,62,0.14);pointer-events:none;}
+  .cert-corner{position:absolute;width:48px;height:48px;color:rgba(184,150,62,0.55);}
+  .cert-corner svg{width:100%;height:100%;}
+  .cert-corner.tl{top:9px;left:9px;}.cert-corner.tr{top:9px;right:9px;transform:scaleX(-1);}.cert-corner.bl{bottom:9px;left:9px;transform:scaleY(-1);}.cert-corner.br{bottom:9px;right:9px;transform:scale(-1);}
+  .cert-watermark{position:absolute;inset:0;opacity:.04;pointer-events:none;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:0 40px;}
+  .cert-wm-line{height:1px;background:#8a6c20;}
+  .cert-logo-area{text-align:center;margin-bottom:3%;}
+  .cert-platform{font-family:'Cinzel',serif;font-size:clamp(10px,1.8vw,17px);letter-spacing:0.34em;color:#8a6c20;text-transform:uppercase;}
+  .cert-platform-rule{display:flex;align-items:center;gap:9px;justify-content:center;margin-top:4px;}
+  .cert-platform-rule::before,.cert-platform-rule::after{content:'';flex:1;height:1px;background:rgba(138,108,32,0.3);max-width:48px;}
+  .cert-diamond{width:5px;height:5px;background:#b8963e;transform:rotate(45deg);display:inline-block;}
+  .cert-presents{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(9px,1.3vw,13px);color:#a08040;letter-spacing:0.1em;margin-bottom:2%;}
+  .cert-award-title{font-family:'Cinzel',serif;font-size:clamp(13px,2.7vw,27px);font-weight:600;color:#5a3e10;letter-spacing:0.12em;text-align:center;line-height:1.2;margin-bottom:2.5%;}
+  .cert-recipient-label{font-family:'Montserrat',sans-serif;font-size:clamp(6px,0.85vw,8px);letter-spacing:0.28em;text-transform:uppercase;color:#a08040;margin-bottom:5px;}
+  .cert-recipient{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,3.8vw,42px);font-weight:300;font-style:italic;color:#2a1a08;letter-spacing:0.03em;border-bottom:1px solid rgba(138,108,32,0.3);padding-bottom:5px;min-width:240px;text-align:center;margin-bottom:2.5%;}
+  .cert-body{font-family:'Noto Serif JP',serif;font-size:clamp(7px,1.05vw,10px);font-weight:300;color:#5a4a30;text-align:center;line-height:2;max-width:72%;margin-bottom:2.5%;}
+  .cert-piece{font-family:'Cormorant Garamond',serif;font-size:clamp(10px,1.5vw,16px);font-style:italic;color:#3a2810;}
+  .cert-score-area{display:flex;gap:28px;align-items:center;margin-bottom:3%;}
+  .cert-score-item{text-align:center;}
+  .cert-score-num{font-family:'Cinzel',serif;font-size:clamp(14px,2.6vw,28px);font-weight:600;color:#8a6c20;line-height:1;}
+  .cert-score-label{font-family:'Montserrat',sans-serif;font-size:clamp(5px,0.78vw,8px);letter-spacing:0.17em;text-transform:uppercase;color:#a08858;margin-top:3px;}
+  .cert-score-divider{width:1px;height:30px;background:rgba(138,108,32,0.25);}
+  .cert-footer{display:flex;justify-content:space-between;align-items:flex-end;width:100%;padding:0 4%;margin-top:auto;}
+  .cert-sig{text-align:center;}
+  .cert-sig-line{width:90px;height:1px;background:rgba(90,62,16,0.35);margin:0 auto 4px;}
+  .cert-sig-name{font-family:'Cormorant Garamond',serif;font-size:clamp(8px,1.2vw,12px);font-style:italic;color:#6a4a20;}
+  .cert-sig-title{font-family:'Montserrat',sans-serif;font-size:clamp(5px,0.78vw,8px);letter-spacing:0.13em;text-transform:uppercase;color:#a08858;margin-top:2px;}
+  .cert-seal{width:clamp(40px,6.5vw,60px);height:clamp(40px,6.5vw,60px);border:2px solid rgba(184,150,62,0.5);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;}
+  .cert-seal::before{content:'';position:absolute;inset:4px;border:1px solid rgba(184,150,62,0.3);border-radius:50%;}
+  .cert-seal-text{font-family:'Cinzel',serif;font-size:clamp(4px,0.72vw,6.5px);color:#8a6c20;letter-spacing:0.05em;text-align:center;line-height:1.4;position:relative;z-index:1;}
+  .cert-date{font-family:'Cormorant Garamond',serif;font-size:clamp(7px,1.05vw,11px);font-style:italic;color:#8a6c20;text-align:center;margin-bottom:3px;}
+
+  /* TOAST */
+  #toast{display:none;position:fixed;bottom:24px;right:24px;z-index:999;background:var(--ink);color:var(--ivory);padding:14px 22px;font-family:'Montserrat',sans-serif;font-size:10px;letter-spacing:0.1em;border-left:3px solid var(--gold);}
+
+  /* TWO COL */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media(max-width:680px){.two-col{grid-template-columns:1fr;}}
+
+  .tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .tab{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);padding:10px 20px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;white-space:nowrap;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+</style>
+</head>
+<body>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <div class="mobile-logo">Musica <span>Online</span></div>
+  <button class="hamburger" onclick="toggleSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+</div>
+
+<!-- OVERLAY -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-text">Musica <span>Online</span></div>
+    <div class="sidebar-logo-sub">参加者ポータル</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="user-avatar">KS</div>
+    <div><div class="user-name">佐藤 健一</div><div class="user-role">参加者</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">メニュー</div>
+    <a class="nav-item active" href="#">◈　ダッシュボード</a>
+    <a class="nav-item" href="#" onclick="showUpload();closeSidebar();return false;">↑　演奏を提出する</a>
+    <a class="nav-item" href="#">♩　エントリー一覧</a>
+    <a class="nav-item" href="#" onclick="showResults();closeSidebar();return false;">◎　講評・結果・賞状</a>
+    <div class="nav-section-label" style="margin-top:10px;">情報</div>
+    <a class="nav-item" href="#">≡　開催中コンクール</a>
+    <a class="nav-item" href="ranking.html">◷　ランキング</a>
+    <a class="nav-item" href="#">⊙　アカウント設定</a>
+  </nav>
+  <div class="sidebar-bottom"><a href="#">ヘルプ・FAQ</a><a href="index.html">トップページへ</a></div>
+</aside>
+
+<!-- DASHBOARD -->
+<main class="main" id="main-dashboard">
+  <div class="page-header">
+    <div><h1 class="page-title">ダッシュボード</h1><p class="page-subtitle">2025年 春季コンクール エントリー受付中</p></div>
+    <a class="header-btn" href="#" onclick="showUpload();return false;">+ 演奏を提出する</a>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-card-num">3</div><div class="stat-card-label">エントリー数</div></div>
+    <div class="stat-card"><div class="stat-card-num gold">82</div><div class="stat-card-label">最高スコア</div></div>
+    <div class="stat-card"><div class="stat-card-num">7<span style="font-size:16px;color:var(--muted)">位</span></div><div class="stat-card-label">現在のランキング</div></div>
+    <div class="stat-card"><div class="stat-card-num">2</div><div class="stat-card-label">未読の講評</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">エントリー一覧</h2>
+      <div class="tabs" style="margin-bottom:0;border-bottom:none;">
+        <div class="tab active">すべて</div><div class="tab">審査中</div><div class="tab">完了</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="table">
+        <thead><tr><th>作品・部門</th><th>提出日</th><th>ステータス</th><th>スコア</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div class="entry-name">ショパン バラード第1番 ト短調</div><div class="entry-meta">ピアノ部門 — 一般</div></td>
+            <td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">2025/03/12</td>
+            <td><span class="badge badge-green">審査完了</span></td>
+            <td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:82%"></div></div><span class="score-num">82</span></div></td>
+            <td><a class="action-link" href="#" onclick="showResults();return false;">講評・賞状 →</a></td>
+          </tr>
+          <tr>
+            <td><div class="entry-name">ベートーヴェン ソナタ「月光」Op.27</div><div class="entry-meta">ピアノ部門 — 一般</div></td>
+            <td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">2025/02/28</td>
+            <td><span class="badge badge-blue">審査中</span></td>
+            <td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:0%"></div></div><span class="score-num" style="color:var(--muted);">—</span></div></td>
+            <td><a class="action-link" href="#">詳細 →</a></td>
+          </tr>
+          <tr>
+            <td><div class="entry-name">モーツァルト ピアノソナタ K.331</div><div class="entry-meta">ピアノ部門 — 一般</div></td>
+            <td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">2025/01/15</td>
+            <td><span class="badge badge-green">審査完了</span></td>
+            <td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:75%"></div></div><span class="score-num">75</span></div></td>
+            <td><a class="action-link" href="#" onclick="showResults();return false;">講評・賞状 →</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><h2 class="card-title">最新の講評</h2><span class="badge badge-gold">新着 2件</span></div>
+      <div class="feedback-item">
+        <div class="feedback-meta"><span class="feedback-judge">山田 薫子 審査員</span><span class="feedback-date">2025/03/18</span></div>
+        <p class="feedback-text">冒頭のテーマ提示は非常に説得力があり、音色の変化も豊かでした。コーダに向けての緊張感の高め方にさらなる工夫があると、より完成度が高まるでしょう。</p>
+      </div>
+      <div class="feedback-item">
+        <div class="feedback-meta"><span class="feedback-judge">田中 博之 審査員</span><span class="feedback-date">2025/03/17</span></div>
+        <p class="feedback-text">テクニック面での安定性は高く評価できます。次は音楽的な「間」の使い方を意識すると、表現の深みが増すと思います。</p>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><h2 class="card-title">開催中コンクール</h2></div>
+      <table class="table">
+        <thead><tr><th>部門</th><th>締切</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><div class="entry-name" style="font-size:13px;">ピアノ 一般</div><div class="entry-meta">¥5,000</div></td><td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">4/30</td><td><a class="action-link" href="#" onclick="showUpload();return false;">参加 →</a></td></tr>
+          <tr><td><div class="entry-name" style="font-size:13px;">ピアノ アマチュア</div><div class="entry-meta">¥4,000</div></td><td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">4/30</td><td><a class="action-link" href="#" onclick="showUpload();return false;">参加 →</a></td></tr>
+          <tr><td><div class="entry-name" style="font-size:13px;">ヴァイオリン 高校生</div><div class="entry-meta">¥3,000</div></td><td style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);">4/25</td><td><a class="action-link" href="#" onclick="showUpload();return false;">参加 →</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- RESULTS & CERT PAGE -->
+<main class="main" id="main-results" style="display:none;">
+  <div class="page-header">
+    <div><h1 class="page-title">講評・結果・賞状</h1><p class="page-subtitle">審査完了済みのエントリー</p></div>
+    <a class="header-btn" href="#" onclick="showDashboard();return false;">← ダッシュボードへ</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">ショパン バラード第1番 ト短調</h2><span class="badge badge-green">第1位 金賞</span></div>
+    <div class="feedback-item">
+      <div class="feedback-meta"><span class="feedback-judge">山田 薫子 審査員</span><span class="feedback-date">2025/03/18</span></div>
+      <p class="feedback-text">冒頭のテーマ提示は非常に説得力があり、音色の変化も豊かでした。コーダに向けての緊張感の高め方にさらなる工夫があると、より完成度が高まるでしょう。技術的な完成度と音楽的な深みのバランスが素晴らしく、今後の演奏活動に大きな期待を寄せています。</p>
+    </div>
+    <div class="feedback-item">
+      <div class="feedback-meta"><span class="feedback-judge">田中 博之 審査員</span><span class="feedback-date">2025/03/17</span></div>
+      <p class="feedback-text">テクニック面での安定性は高く評価できます。特に第2主題の歌わせ方に個性が感じられ、聴衆を引き込む力がありました。次は音楽的な「間」の使い方を意識すると、表現の深みがさらに増すと思います。</p>
+    </div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+      <p style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">賞状のダウンロード</p>
+      <div class="cert-download-row">
+        <div>
+          <div class="cert-download-info">第1位 金賞 — 賞状</div>
+          <div class="cert-download-meta">2025年 春季コンクール ／ ピアノ部門 一般</div>
+        </div>
+        <button class="cert-dl-btn-sm" onclick="showCert('佐藤 健一','ショパン バラード第1番 ト短調','96','第1位 金賞')">賞状を見る・ダウンロード</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">モーツァルト ピアノソナタ K.331</h2><span class="badge badge-muted">入賞</span></div>
+    <div class="feedback-item">
+      <div class="feedback-meta"><span class="feedback-judge">山田 薫子 審査員</span><span class="feedback-date">2025/01/22</span></div>
+      <p class="feedback-text">モーツァルト特有の透明感のある音色が印象的でした。変奏曲としての各変奏の性格付けが明確で、聴き応えのある演奏でした。テンポの揺れをより制御すると安定感が増すでしょう。</p>
+    </div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border);">
+      <p style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">賞状のダウンロード</p>
+      <div class="cert-download-row">
+        <div>
+          <div class="cert-download-info">入賞 — 賞状</div>
+          <div class="cert-download-meta">2025年 冬季コンクール ／ ピアノ部門 一般</div>
+        </div>
+        <button class="cert-dl-btn-sm" onclick="showCert('佐藤 健一','モーツァルト ピアノソナタ K.331','75','入賞')">賞状を見る・ダウンロード</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- UPLOAD PAGE -->
+<main class="main" id="main-upload" style="display:none;">
+  <div class="page-header">
+    <div><h1 class="page-title">演奏を提出する</h1><p class="page-subtitle">動画または音声ファイルをアップロード</p></div>
+    <a class="header-btn" href="#" onclick="showDashboard();return false;">← ダッシュボードへ</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Step 1 — 参加部門の選択</h2><span class="badge badge-gold">必須</span></div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">楽器・部門</label><select class="form-select"><option>ピアノ部門</option><option>ヴァイオリン部門</option><option>声楽部門</option></select></div>
+      <div class="form-group"><label class="form-label">参加区分</label><select class="form-select"><option>一般（¥5,000）</option><option>アマチュア（¥4,000）</option><option>大学生（¥3,500）</option><option>高校生（¥3,000）</option><option>中学生（¥2,500）</option><option>小学生以下（¥2,000）</option></select></div>
+      <div class="form-group full"><label class="form-label">演奏曲目</label><input class="form-input" type="text" placeholder="例：ショパン バラード第1番 ト短調 Op.23"></div>
+      <div class="form-group"><label class="form-label">作曲家</label><input class="form-input" type="text" placeholder="例：フレデリック・ショパン"></div>
+      <div class="form-group"><label class="form-label">演奏時間（目安）</label><input class="form-input" type="text" placeholder="例：8分30秒"></div>
+      <div class="form-group full"><label class="form-label">備考・補足（任意）</label><textarea class="form-textarea" placeholder="録音環境・使用楽器・特記事項があればご記入ください"></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Step 2 — ファイルのアップロード</h2><span class="badge badge-gold">必須</span></div>
+    <div class="upload-area" id="drop-zone" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+      <span class="upload-icon">↑</span>
+      <h3 class="upload-title">ここにファイルをドロップ</h3>
+      <p class="upload-desc">またはクリックしてファイルを選択<br>動画・音声どちらでも提出可能です</p>
+      <div class="upload-formats"><span class="format-tag">MP4</span><span class="format-tag">MOV</span><span class="format-tag">MP3</span><span class="format-tag">WAV</span><span class="format-tag">FLAC</span></div>
+      <button class="btn-upload" onclick="event.stopPropagation();document.getElementById('file-input').click()">ファイルを選択する</button>
+      <input type="file" id="file-input" accept="video/*,audio/*" onchange="handleFile(this)">
+    </div>
+    <div class="upload-progress" id="upload-progress">
+      <div class="form-divider"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:15px;" id="file-name">ballad_no1.mp4</span>
+        <span class="badge badge-blue" id="file-size">324 MB</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
+      <div class="progress-label"><span id="progress-text">アップロード中...</span><span id="progress-pct">0%</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2 class="card-title">Step 3 — お支払い確認</h2><span class="badge badge-muted">最終ステップ</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">
+      <div><div style="font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">選択部門</div><div style="font-family:'Cormorant Garamond',serif;font-size:18px;">ピアノ部門 — 一般</div><div style="font-family:'Montserrat',sans-serif;font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.09em;">2025年 春季コンクール</div></div>
+      <div style="text-align:right;"><div style="font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">参加費</div><div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:300;color:var(--gold);">¥5,000</div></div>
+    </div>
+    <div class="form-divider"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn-upload" onclick="mockPayment()">クレジットカードで支払う</button>
+      <button class="btn-upload" style="background:var(--cream);color:var(--ink);" onclick="mockPayment()">PayPayで支払う</button>
+      <span style="font-family:'Montserrat',sans-serif;font-size:8px;color:var(--muted);letter-spacing:0.09em;">Stripeにより安全に処理されます</span>
+    </div>
+  </div>
+</main>
+
+<!-- CERT OVERLAY -->
+<div class="cert-overlay" id="cert-overlay">
+  <div class="cert-wrapper">
+    <button class="cert-close" onclick="closeCert()">✕ 閉じる</button>
+    <div id="certificate">
+      <div class="cert-watermark"><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div><div class="cert-wm-line"></div></div>
+      <div class="cert-corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M4 4L4 28M4 4L28 4" stroke="currentColor" stroke-width="1"/><circle cx="4" cy="4" r="2" fill="currentColor"/><circle cx="28" cy="4" r="1" fill="currentColor" opacity="0.5"/><circle cx="4" cy="28" r="1" fill="currentColor" opacity="0.5"/></svg></div>
+      <div class="cert-corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M4 4L4 28M4 4L28 4" stroke="currentColor" stroke-width="1"/><circle cx="4" cy="4" r="2" fill="currentColor"/><circle cx="28" cy="4" r="1" fill="currentColor" opacity="0.5"/><circle cx="4" cy="28" r="1" fill="currentColor" opacity="0.5"/></svg></div>
+      <div class="cert-corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M4 4L4 28M4 4L28 4" stroke="currentColor" stroke-width="1"/><circle cx="4" cy="4" r="2" fill="currentColor"/><circle cx="28" cy="4" r="1" fill="currentColor" opacity="0.5"/><circle cx="4" cy="28" r="1" fill="currentColor" opacity="0.5"/></svg></div>
+      <div class="cert-corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M4 4L4 28M4 4L28 4" stroke="currentColor" stroke-width="1"/><circle cx="4" cy="4" r="2" fill="currentColor"/><circle cx="28" cy="4" r="1" fill="currentColor" opacity="0.5"/><circle cx="4" cy="28" r="1" fill="currentColor" opacity="0.5"/></svg></div>
+      <div class="cert-logo-area"><div class="cert-platform">Musica Online</div><div class="cert-platform-rule"><div class="cert-diamond"></div></div></div>
+      <div class="cert-presents">この賞状を以下の方に贈呈いたします</div>
+      <div class="cert-award-title" id="cert-award-title">第1位 金賞</div>
+      <div class="cert-recipient-label">受賞者</div>
+      <div class="cert-recipient" id="cert-recipient-name">佐藤 健一</div>
+      <div class="cert-body">2025年 春季オンラインクラシック音楽コンクール<br>ピアノ部門（一般）において<br><span class="cert-piece" id="cert-piece-name">ショパン バラード第1番 ト短調</span><br>を演奏し、卓越した音楽的表現と技術により<br>上記の賞を受賞されたことをここに証します。</div>
+      <div class="cert-score-area">
+        <div class="cert-score-item"><div class="cert-score-num" id="cert-score-num">96</div><div class="cert-score-label">総合スコア</div></div>
+        <div class="cert-score-divider"></div>
+        <div class="cert-score-item"><div class="cert-score-num">100</div><div class="cert-score-label">満点</div></div>
+        <div class="cert-score-divider"></div>
+        <div class="cert-score-item"><div class="cert-score-num">48</div><div class="cert-score-label">参加者数</div></div>
+      </div>
+      <div class="cert-footer">
+        <div class="cert-sig"><div class="cert-sig-line"></div><div class="cert-sig-name">山田 薫子</div><div class="cert-sig-title">審査委員長</div></div>
+        <div style="text-align:center;"><div class="cert-date">2025年 4月 30日</div><div class="cert-seal"><div class="cert-seal-text">MUSICA<br>ONLINE<br>2025</div></div></div>
+        <div class="cert-sig"><div class="cert-sig-line"></div><div class="cert-sig-name">Musica Online 運営</div><div class="cert-sig-title">主催者</div></div>
+      </div>
+    </div>
+    <div class="cert-actions">
+      <button class="cert-share-btn">SNSでシェア</button>
+      <button class="cert-dl-btn" onclick="downloadCert()">PDFでダウンロード</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">エントリー受付完了！審査員から通知が届きます。</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  function showUpload(){hide();document.getElementById('main-upload').style.display='block';scroll();}
+  function showDashboard(){hide();document.getElementById('main-dashboard').style.display='block';scroll();}
+  function showResults(){hide();document.getElementById('main-results').style.display='block';scroll();}
+  function hide(){['main-dashboard','main-upload','main-results'].forEach(id=>document.getElementById(id).style.display='none');}
+  function scroll(){window.scrollTo(0,0);}
+
+  function toggleSidebar(){
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSidebar(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  function handleDrag(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
+  function handleDragLeave(){document.getElementById('drop-zone').classList.remove('drag-over');}
+  function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)startUpload(f);}
+  function handleFile(input){if(input.files[0])startUpload(input.files[0]);}
+  function startUpload(file){
+    const prog=document.getElementById('upload-progress');prog.classList.add('visible');
+    document.getElementById('file-name').textContent=file.name;
+    document.getElementById('file-size').textContent=(file.size/1024/1024).toFixed(0)+' MB';
+    let pct=0;const fill=document.getElementById('progress-fill');const pctEl=document.getElementById('progress-pct');const textEl=document.getElementById('progress-text');
+    const iv=setInterval(()=>{
+      pct+=Math.random()*8;if(pct>=100){pct=100;clearInterval(iv);textEl.textContent='アップロード完了';fill.style.background='#3a7d5c';}
+      pctEl.textContent=Math.round(pct)+'%';fill.style.width=pct+'%';
+    },180);
+  }
+  function mockPayment(){const t=document.getElementById('toast');t.style.display='block';setTimeout(()=>{t.style.display='none';showDashboard();},3000);}
+
+  function showCert(name,piece,score,award){
+    document.getElementById('cert-recipient-name').textContent=name;
+    document.getElementById('cert-piece-name').textContent=piece;
+    document.getElementById('cert-score-num').textContent=score;
+    document.getElementById('cert-award-title').textContent=award;
+    document.getElementById('cert-overlay').classList.add('show');
+  }
+  function closeCert(){document.getElementById('cert-overlay').classList.remove('show');}
+  function downloadCert(){
+    const btn=event.target;btn.textContent='生成中...';btn.disabled=true;
+    html2canvas(document.getElementById('certificate'),{scale:2,backgroundColor:'#faf6ee'}).then(canvas=>{
+      const link=document.createElement('a');link.download='賞状_Musica_Online_2025.png';link.href=canvas.toDataURL('image/png');link.click();
+      btn.textContent='PDFでダウンロード';btn.disabled=false;
+    }).catch(()=>{btn.textContent='PDFでダウンロード';btn.disabled=false;});
+  }
+</script>
+</body>
+</html>
