@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musica Online — オンライン クラシック音楽コンクール</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410; --ivory: #f5f0e8; --cream: #ede6d6;
+    --gold: #b8963e; --gold-light: #d4ae5c; --muted: #7a6f62;
+    --border: rgba(184,150,62,0.25);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--ivory); color: var(--ink); font-family: 'Noto Serif JP', serif; font-weight: 300; overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px; gap: 16px;
+    background: rgba(245,240,232,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink); text-decoration: none; white-space: nowrap; }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 28px; list-style: none; }
+  .nav-links a { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; white-space: nowrap; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ivory); background: var(--ink); border: none; padding: 10px 20px; cursor: pointer; transition: background 0.2s; text-decoration: none; white-space: nowrap; }
+  .nav-cta:hover { background: var(--gold); }
+  @media (max-width: 768px) { .nav-links { display: none; } nav { padding: 14px 20px; } }
+
+  /* HERO */
+  .hero { padding-top: 72px; }
+  .hero-inner {
+    display: grid; grid-template-columns: 1fr 1fr; min-height: calc(100vh - 72px);
+  }
+  .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 60px 48px 60px 52px; }
+  .hero-eyebrow { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+  .hero-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: var(--gold); }
+  .hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 5vw, 76px); font-weight: 300; line-height: 1.08; letter-spacing: -0.01em; margin-bottom: 28px; }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-subtitle { font-size: 14px; line-height: 1.95; color: var(--muted); max-width: 380px; margin-bottom: 44px; }
+  .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .btn-primary { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ivory); background: var(--ink); border: none; padding: 15px 36px; cursor: pointer; transition: all 0.25s; text-decoration: none; display: inline-block; }
+  .btn-primary:hover { background: var(--gold); }
+  .btn-ghost { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--border); padding: 15px 36px; cursor: pointer; transition: all 0.25s; text-decoration: none; display: inline-block; }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .hero-stats { display: flex; gap: 32px; margin-top: 56px; padding-top: 36px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; display: block; line-height: 1; }
+  .stat-label { font-family: 'Montserrat', sans-serif; font-size: 8px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: block; margin-top: 5px; }
+  .hero-right { background: var(--cream); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 360px; }
+  .score-deco { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 48px; opacity: 0.15; }
+  .score-line { height: 1px; background: var(--ink); margin: 16px 0; position: relative; }
+  .score-line::before { content: ''; position: absolute; top: -4px; width: 2px; height: 9px; background: var(--ink); left: var(--p1, 20%); }
+  .score-line::after { content: ''; position: absolute; top: -4px; width: 2px; height: 9px; background: var(--ink); left: var(--p2, 55%); }
+  .hero-card { position: relative; z-index: 1; background: var(--ivory); border: 1px solid var(--border); padding: 32px; width: calc(100% - 64px); max-width: 340px; animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .card-badge { font-family: 'Montserrat', sans-serif; font-size: 8px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ivory); background: var(--gold); display: inline-block; padding: 4px 11px; margin-bottom: 16px; }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; line-height: 1.4; margin-bottom: 6px; }
+  .card-meta { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.13em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; }
+  .card-divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .card-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .card-row-label { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+  .card-row-value { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; }
+  .progress-bar { height: 2px; background: var(--cream); margin-top: 14px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--gold); animation: grow 2.5s ease-out forwards; width: 0; }
+  @keyframes grow { to { width: var(--w, 68%); } }
+
+  @media (max-width: 768px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-left { padding: 48px 24px; }
+    .hero-right { min-height: 300px; }
+    .hero-card { padding: 24px; width: calc(100% - 48px); }
+    .hero-title { font-size: clamp(38px, 9vw, 60px); }
+  }
+  @media (max-width: 480px) {
+    .hero-left { padding: 40px 20px; }
+    .hero-actions { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-ghost { text-align: center; padding: 14px 24px; }
+  }
+
+  /* HOW IT WORKS */
+  .section-how { padding: 100px 32px; }
+  .section-label { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-label::before { content: ''; display: block; width: 28px; height: 1px; background: var(--gold); }
+  .section-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.15; margin-bottom: 64px; max-width: 520px; }
+  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .step { background: var(--cream); padding: 36px 24px; position: relative; overflow: hidden; transition: background 0.3s; }
+  .step:hover { background: var(--ink); }
+  .step:hover .step-title, .step:hover .step-desc { color: var(--ivory); }
+  .step:hover .step-line { background: var(--gold); }
+  .step-num { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 300; line-height: 1; color: rgba(26,20,16,0.07); position: absolute; top: 16px; right: 20px; transition: color 0.3s; }
+  .step:hover .step-num { color: rgba(255,255,255,0.07); }
+  .step-line { width: 22px; height: 1px; background: var(--gold); margin-bottom: 20px; transition: background 0.3s; }
+  .step-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 10px; transition: color 0.3s; }
+  .step-desc { font-size: 12px; line-height: 1.85; color: var(--muted); transition: color 0.3s; }
+  .step:hover .step-desc { color: rgba(245,240,232,0.6); }
+  @media (max-width: 768px) {
+    .section-how { padding: 72px 20px; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .steps-grid { grid-template-columns: 1fr; gap: 2px; }
+  }
+
+  /* CATEGORIES */
+  .section-categories { padding: 0 32px 100px; }
+  .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .category-card { border: 1px solid var(--border); padding: 32px; position: relative; cursor: pointer; transition: all 0.3s; }
+  .category-card:hover { border-color: var(--gold); }
+  .cat-icon { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold); font-size: 32px; display: block; margin-bottom: 16px; }
+  .cat-name { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+  .cat-desc { font-size: 12px; color: var(--muted); line-height: 1.85; margin-bottom: 20px; }
+  .cat-meta { display: flex; justify-content: space-between; align-items: center; }
+  .cat-price { font-family: 'Cormorant Garamond', serif; font-size: 19px; color: var(--gold); }
+  .cat-arrow { font-size: 18px; color: var(--ink); transition: transform 0.2s; }
+  .category-card:hover .cat-arrow { transform: translateX(4px); }
+  .cat-badge { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #8b4a2f; border: 1px solid #8b4a2f; padding: 3px 9px; display: inline-block; margin-bottom: 10px; }
+  @media (max-width: 768px) {
+    .section-categories { padding: 0 20px 72px; }
+    .categories-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  /* JUDGES */
+  .section-judges { background: var(--ink); padding: 100px 32px; }
+  .section-judges .section-label { color: var(--gold-light); }
+  .section-judges .section-label::before { background: var(--gold-light); }
+  .section-judges .section-heading { color: var(--ivory); }
+  .judges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .judge-card { border: 1px solid rgba(184,150,62,0.18); padding: 32px; transition: border-color 0.3s; }
+  .judge-card:hover { border-color: var(--gold); }
+  .judge-initials { width: 56px; height: 56px; background: rgba(184,150,62,0.13); border: 1px solid rgba(184,150,62,0.28); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--gold-light); margin-bottom: 20px; }
+  .judge-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--ivory); margin-bottom: 4px; }
+  .judge-title { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+  .judge-bio { font-size: 12px; line-height: 1.9; color: rgba(245,240,232,0.5); }
+  @media (max-width: 768px) {
+    .section-judges { padding: 72px 20px; }
+    .judges-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  /* CTA */
+  .section-cta { padding: 120px 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; border-top: 1px solid var(--border); }
+  .cta-heading { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 4vw, 60px); font-weight: 300; line-height: 1.1; }
+  .cta-heading em { font-style: italic; color: var(--gold); }
+  .cta-right { display: flex; flex-direction: column; gap: 0; }
+  .cta-point { display: flex; gap: 16px; align-items: flex-start; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .cta-point:last-of-type { border-bottom: none; margin-bottom: 0; }
+  .cta-point-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: var(--gold); line-height: 1; min-width: 28px; }
+  .cta-point-text strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; margin-bottom: 3px; }
+  .cta-point-text span { font-size: 12px; color: var(--muted); line-height: 1.75; }
+  .cta-actions { display: flex; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+  @media (max-width: 768px) {
+    .section-cta { grid-template-columns: 1fr; padding: 72px 20px; gap: 48px; }
+  }
+
+  /* FOOTER */
+  footer { background: var(--ink); color: rgba(245,240,232,0.35); padding: 36px 32px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(184,150,62,0.12); flex-wrap: wrap; gap: 16px; }
+  footer .nav-logo { color: var(--ivory); }
+  .footer-copy { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.1em; }
+  .footer-links { display: flex; gap: 20px; list-style: none; flex-wrap: wrap; }
+  .footer-links a { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,240,232,0.35); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--gold); }
+  @media (max-width: 480px) {
+    footer { flex-direction: column; align-items: flex-start; padding: 28px 20px; }
+  }
+
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+  .deco-rule { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .deco-rule::before, .deco-rule::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .deco-rule-inner { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; color: var(--gold); }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="#">Musica <span>Online</span></a>
+  <ul class="nav-links">
+    <li><a href="#">コンクールについて</a></li>
+    <li><a href="#">部門一覧</a></li>
+    <li><a href="#">審査員</a></li>
+    <li><a href="ranking.html">結果・ランキング</a></li>
+  </ul>
+  <a class="nav-cta" href="music-competition-mypage.html">参加登録</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <p class="hero-eyebrow">2025年 春季コンクール エントリー受付中</p>
+      <h1 class="hero-title">世界へ届ける、<br>あなたの<em>音楽</em>を。</h1>
+      <p class="hero-subtitle">場所を選ばず、本格的なクラシック音楽コンクールへ挑戦できる。プロの審査員による丁寧な講評と、透明性の高い審査であなたの演奏を正当に評価します。</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="music-competition-mypage.html">今すぐ参加する</a>
+        <a class="btn-ghost" href="#">詳細を見る</a>
+      </div>
+      <div class="hero-stats">
+        <div><span class="stat-num">1,240</span><span class="stat-label">累計参加者</span></div>
+        <div><span class="stat-num">48</span><span class="stat-label">審査員数</span></div>
+        <div><span class="stat-num">12</span><span class="stat-label">開催部門数</span></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="score-deco">
+        <div class="score-line" style="--p1:15%;--p2:48%"></div>
+        <div class="score-line" style="--p1:28%;--p2:61%"></div>
+        <div class="score-line" style="--p1:10%;--p2:55%"></div>
+        <div class="score-line" style="--p1:33%;--p2:70%"></div>
+        <div class="score-line" style="--p1:22%;--p2:45%"></div>
+        <div class="score-line" style="--p1:18%;--p2:58%"></div>
+        <div class="score-line" style="--p1:40%;--p2:72%"></div>
+        <div class="score-line" style="--p1:12%;--p2:50%"></div>
+      </div>
+      <div class="hero-card">
+        <span class="card-badge">エントリー受付中</span>
+        <h3 class="card-title">ピアノ部門（一般）</h3>
+        <p class="card-meta">締切 — 2025年 4月 30日</p>
+        <div class="card-divider"></div>
+        <div class="card-row"><span class="card-row-label">参加費</span><span class="card-row-value">¥5,000</span></div>
+        <div class="card-row"><span class="card-row-label">募集人数</span><span class="card-row-value">50名</span></div>
+        <div class="card-row"><span class="card-row-label">現在の応募</span><span class="card-row-value">34名</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="--w:68%"></div></div>
+        <div style="margin-top:20px;"><a class="btn-primary" href="music-competition-mypage.html" style="display:block;text-align:center;padding:13px;">このカテゴリに申し込む</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-how">
+  <p class="section-label fade-in">参加の流れ</p>
+  <h2 class="section-heading fade-in">4ステップでコンクールに参加できる</h2>
+  <div class="steps-grid">
+    <div class="step fade-in"><span class="step-num">1</span><div class="step-line"></div><h3 class="step-title">会員登録・<br>部門選択</h3><p class="step-desc">メールアドレスで無料登録後、部門を選びます。一般・アマチュア・大学生・高校生・中学生・小学生以下から選択できます。</p></div>
+    <div class="step fade-in" style="transition-delay:.08s"><span class="step-num">2</span><div class="step-line"></div><h3 class="step-title">参加費<br>お支払い</h3><p class="step-desc">クレジットカードまたはPayPayで安全に決済。領収書をすぐに発行します。</p></div>
+    <div class="step fade-in" style="transition-delay:.16s"><span class="step-num">3</span><div class="step-line"></div><h3 class="step-title">演奏動画を<br>アップロード</h3><p class="step-desc">自宅やスタジオで録音・録画した演奏をプラットフォームに提出します。</p></div>
+    <div class="step fade-in" style="transition-delay:.24s"><span class="step-num">4</span><div class="step-line"></div><h3 class="step-title">審査・<br>結果発表</h3><p class="step-desc">プロ審査員による採点と丁寧な講評が届き、結果を確認できます。</p></div>
+  </div>
+</section>
+
+<section class="section-categories">
+  <div class="deco-rule"><span class="deco-rule-inner">♩</span></div>
+  <p class="section-label fade-in">部門一覧</p>
+  <h2 class="section-heading fade-in">あなたに合った部門を選ぼう</h2>
+  <div class="categories-grid">
+    <div class="category-card fade-in"><span class="cat-icon">♪</span><p class="cat-badge">募集中</p><h3 class="cat-name">ピアノ部門</h3><p class="cat-desc">ソナタ・協奏曲・小品など幅広いレパートリーに対応。小学生以下から一般まで年齢別に設定。</p><div class="cat-meta"><span class="cat-price">¥3,000〜¥5,000</span><span class="cat-arrow">→</span></div></div>
+    <div class="category-card fade-in" style="transition-delay:.08s"><span class="cat-icon">♫</span><p class="cat-badge">募集中</p><h3 class="cat-name">ヴァイオリン部門</h3><p class="cat-desc">独奏から伴奏付きまで。世界的奏者を輩出してきた審査員が評価します。</p><div class="cat-meta"><span class="cat-price">¥3,000〜¥5,000</span><span class="cat-arrow">→</span></div></div>
+    <div class="category-card fade-in" style="transition-delay:.16s"><span class="cat-icon">♬</span><p class="cat-badge">近日公開</p><h3 class="cat-name">声楽部門</h3><p class="cat-desc">ソプラノ・メゾ・テノール・バリトン各声域に対応。歌曲・アリアのどちらも可。</p><div class="cat-meta"><span class="cat-price">¥3,500〜¥6,000</span><span class="cat-arrow">→</span></div></div>
+  </div>
+</section>
+
+<section class="section-judges">
+  <p class="section-label fade-in">審査員</p>
+  <h2 class="section-heading fade-in" style="margin-bottom:48px;">一流の音楽家が<br>あなたの演奏を評価する</h2>
+  <div class="judges-grid">
+    <div class="judge-card fade-in"><div class="judge-initials">KY</div><h3 class="judge-name">山田 薫子</h3><p class="judge-title">審査委員長 — ピアノ</p><p class="judge-bio">桐朋学園大学卒業後、ウィーン国立音楽大学に留学。国内外のコンクール審査経験多数。現在は東京音楽大学教授として後進の指導にあたる。</p></div>
+    <div class="judge-card fade-in" style="transition-delay:.08s"><div class="judge-initials">HT</div><h3 class="judge-name">田中 博之</h3><p class="judge-title">審査員 — ヴァイオリン</p><p class="judge-bio">東京藝術大学首席卒業。パリ国立高等音楽院修了。現在はソリストとして活動しながら、国際コンクールの審査員を務める。</p></div>
+    <div class="judge-card fade-in" style="transition-delay:.16s"><div class="judge-initials">MN</div><h3 class="judge-name">中村 雅美</h3><p class="judge-title">審査員 — 声楽</p><p class="judge-bio">二期会会員。ミラノ・スカラ座にてキャリアを積み、帰国後は声楽指導者として活躍。丁寧なフィードバックに定評がある。</p></div>
+  </div>
+</section>
+
+<section class="section-cta">
+  <div>
+    <p class="section-label fade-in">参加を迷っている方へ</p>
+    <h2 class="cta-heading fade-in">演奏する場所は、<br>どこでも<em>舞台</em>になる。</h2>
+  </div>
+  <div class="cta-right fade-in">
+    <div class="cta-point"><span class="cta-point-num">1</span><div class="cta-point-text"><strong>自宅から本格審査を受けられる</strong><span>スタジオ不要。スマートフォンの録音でもエントリー可能です。</span></div></div>
+    <div class="cta-point"><span class="cta-point-num">2</span><div class="cta-point-text"><strong>プロによる丁寧な講評が届く</strong><span>得点だけでなく、次の上達につながる具体的なコメントが必ず届きます。</span></div></div>
+    <div class="cta-point"><span class="cta-point-num">3</span><div class="cta-point-text"><strong>透明な審査で安心して参加できる</strong><span>採点基準とスコアを公開。フェアな評価への信頼が生まれます。</span></div></div>
+    <div class="cta-actions"><a class="btn-primary" href="music-competition-mypage.html">無料で会員登録</a><a class="btn-ghost" href="#">よくある質問</a></div>
+  </div>
+</section>
+
+<footer>
+  <a class="nav-logo" href="#">Musica <span style="color:var(--gold)">Online</span></a>
+  <ul class="footer-links"><li><a href="#">利用規約</a></li><li><a href="#">プライバシーポリシー</a></li><li><a href="#">お問い合わせ</a></li></ul>
+  <p class="footer-copy">© 2025 Musica Online. All rights reserved.</p>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
