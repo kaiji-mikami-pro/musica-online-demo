@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musica Online — コンクール主催者向けシステム提供</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+JP:wght@300;400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410; --ivory: #f5f0e8; --cream: #ede6d6;
+    --gold: #b8963e; --gold-lt: #d4ae5c; --gold-pl: #f5e4b0;
+    --muted: #7a6f62; --border: rgba(184,150,62,0.22);
+    --teal: #1a5a4a; --teal-lt: #e8f4f0;
+    --red: #8b2a2a; --red-lt: #faeaea;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--ivory);
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px; gap: 16px;
+    background: rgba(26,20,16,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(184,150,62,0.15);
+  }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; letter-spacing: 0.08em; color: var(--ivory); text-decoration: none; white-space: nowrap; }
+  .logo span { color: var(--gold); }
+  .logo-sub { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,240,232,0.3); margin-top: 2px; }
+  .nav-cta { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink); background: var(--gold); border: none; padding: 10px 22px; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--gold-lt); }
+  @media(max-width:600px){ nav { padding: 14px 20px; } }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; padding: 100px 40px 80px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(transparent, transparent 28px, rgba(184,150,62,0.04) 28px, rgba(184,150,62,0.04) 29px);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold);
+    display: flex; align-items: center; gap: 12px; justify-content: center; margin-bottom: 24px;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after { content: ''; display: block; width: 32px; height: 1px; background: rgba(184,150,62,0.5); }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 6vw, 72px); font-weight: 300; line-height: 1.1; letter-spacing: -0.01em;
+    margin-bottom: 24px; max-width: 820px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-title em { font-style: italic; color: var(--gold); }
+  .hero-subtitle {
+    font-size: clamp(13px, 1.8vw, 16px); line-height: 2; color: rgba(245,240,232,0.6);
+    max-width: 600px; margin-bottom: 48px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both; }
+  .btn-gold { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); background: var(--gold); border: none; padding: 16px 40px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+  .btn-gold:hover { background: var(--gold-lt); }
+  .btn-outline { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,240,232,0.6); background: transparent; border: 1px solid rgba(184,150,62,0.3); padding: 16px 40px; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @media(max-width:600px){ .hero { padding: 90px 20px 60px; } }
+
+  /* ── PAIN SECTION ── */
+  .section { padding: 96px 40px; max-width: 1000px; margin: 0 auto; }
+  .section-eyebrow { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-eyebrow::before { content: ''; display: block; width: 28px; height: 1px; background: var(--gold); }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 4vw, 48px); font-weight: 300; line-height: 1.15; margin-bottom: 48px; }
+  .section-title em { font-style: italic; color: var(--gold); }
+
+  .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .pain-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(184,150,62,0.1); padding: 32px 28px; position: relative; }
+  .pain-num { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 300; color: rgba(184,150,62,0.15); line-height: 1; margin-bottom: 16px; display: block; }
+  .pain-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 10px; color: rgba(245,240,232,0.9); }
+  .pain-desc { font-size: 12px; line-height: 1.9; color: rgba(245,240,232,0.45); }
+  @media(max-width:640px){ .pain-grid { grid-template-columns: 1fr; } .section { padding: 64px 20px; } }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid rgba(184,150,62,0.15); margin: 0 40px; }
+
+  /* ── SOLUTION ── */
+  .solution-wrap { background: rgba(26,90,74,0.08); border-top: 1px solid rgba(26,90,74,0.3); border-bottom: 1px solid rgba(26,90,74,0.3); }
+  .solution-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(26,90,74,0.2); }
+  .sol-card { background: var(--ink); padding: 32px 24px; }
+  .sol-icon { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--teal); margin-bottom: 16px; display: block; font-style: italic; }
+  .sol-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 10px; }
+  .sol-desc { font-size: 12px; line-height: 1.9; color: rgba(245,240,232,0.5); }
+  @media(max-width:768px){ .solution-grid { grid-template-columns: 1fr; } }
+
+  /* ── PRICING ── */
+  .pricing-hero {
+    text-align: center; padding: 80px 40px 48px;
+  }
+  .price-big { font-family: 'Cormorant Garamond', serif; font-size: clamp(56px, 10vw, 96px); font-weight: 300; color: var(--gold); line-height: 1; }
+  .price-sub { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,240,232,0.4); margin-top: 8px; }
+
+  .fee-table { max-width: 760px; margin: 0 auto; border-collapse: collapse; width: 100%; }
+  .fee-table th { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); text-align: left; padding: 0 16px 10px 0; border-bottom: 1px solid rgba(184,150,62,0.2); }
+  .fee-table td { padding: 13px 16px 13px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; vertical-align: top; }
+  .fee-table tr:last-child td { border-bottom: none; }
+  .fee-in { color: rgba(26,90,74,0.9); font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; background: rgba(26,90,74,0.2); padding: 3px 10px; display: inline-block; }
+  .fee-out { color: rgba(139,42,42,0.9); font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; background: rgba(139,42,42,0.15); padding: 3px 10px; display: inline-block; }
+
+  /* sim table */
+  .sim-wrap { max-width: 640px; margin: 40px auto 0; overflow-x: auto; }
+  .sim-table { width: 100%; border-collapse: collapse; }
+  .sim-table th { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(245,240,232,0.4); text-align: center; padding: 0 8px 10px; border-bottom: 1px solid rgba(184,150,62,0.15); }
+  .sim-table th:first-child { text-align: left; }
+  .sim-table td { padding: 11px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; text-align: center; color: rgba(245,240,232,0.7); }
+  .sim-table td:first-child { text-align: left; }
+  .sim-table tr:last-child td { border-bottom: none; }
+  .sim-table .highlight { color: var(--teal); font-family: 'Cormorant Garamond', serif; font-size: 17px; }
+  @media(max-width:600px){ .pricing-hero { padding: 60px 20px 36px; } }
+
+  /* ── DEMO ── */
+  .demo-section { background: rgba(184,150,62,0.04); border-top: 1px solid rgba(184,150,62,0.15); border-bottom: 1px solid rgba(184,150,62,0.15); }
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px; margin: 0 auto; }
+  .demo-card { border: 1px solid rgba(184,150,62,0.15); padding: 24px 28px; transition: border-color 0.2s; text-decoration: none; display: block; }
+  .demo-card:hover { border-color: var(--gold); }
+  .demo-card-label { font-family: 'Montserrat', sans-serif; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .demo-card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: var(--ivory); margin-bottom: 6px; }
+  .demo-card-desc { font-size: 12px; color: rgba(245,240,232,0.45); line-height: 1.7; }
+  .demo-card-arrow { font-size: 14px; color: var(--gold); margin-top: 16px; display: block; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.15em; }
+  @media(max-width:640px){ .demo-grid { grid-template-columns: 1fr; } }
+
+  /* ── FLOW ── */
+  .flow-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .flow-step { padding: 32px 24px; position: relative; border-right: 1px solid rgba(184,150,62,0.1); }
+  .flow-step:last-child { border-right: none; }
+  .flow-num { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300; color: rgba(184,150,62,0.12); line-height: 1; margin-bottom: 16px; display: block; }
+  .flow-title { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; margin-bottom: 8px; }
+  .flow-desc { font-size: 11px; line-height: 1.85; color: rgba(245,240,232,0.45); }
+  @media(max-width:768px){ .flow-grid { grid-template-columns: 1fr 1fr; } .flow-step { border-right: none; border-bottom: 1px solid rgba(184,150,62,0.1); } }
+  @media(max-width:480px){ .flow-grid { grid-template-columns: 1fr; } }
+
+  /* ── CTA / FORM ── */
+  .cta-section { padding: 96px 40px; text-align: center; }
+  .cta-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 5vw, 56px); font-weight: 300; line-height: 1.1; margin-bottom: 16px; }
+  .cta-title em { font-style: italic; color: var(--gold); }
+  .cta-sub { font-size: 13px; color: rgba(245,240,232,0.5); line-height: 1.9; max-width: 500px; margin: 0 auto 48px; }
+
+  .form-wrap { max-width: 560px; margin: 0 auto; text-align: left; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-label { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(245,240,232,0.4); }
+  .form-input, .form-select, .form-textarea {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(184,150,62,0.2);
+    padding: 12px 16px; font-family: 'Noto Serif JP', serif; font-size: 13px; color: var(--ivory);
+    outline: none; width: 100%; transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+  .form-input::placeholder, .form-textarea::placeholder { color: rgba(245,240,232,0.2); }
+  .form-select { appearance: none; cursor: pointer; }
+  .form-select option { background: var(--ink); }
+  .form-textarea { resize: vertical; min-height: 100px; }
+  .form-submit { width: 100%; background: var(--gold); color: var(--ink); border: none; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; padding: 16px; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+  .form-submit:hover { background: var(--gold-lt); }
+  .form-note { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.1em; color: rgba(245,240,232,0.25); text-align: center; margin-top: 12px; line-height: 1.7; }
+
+  /* success message */
+  .form-success { display: none; text-align: center; padding: 32px; border: 1px solid rgba(26,90,74,0.4); background: rgba(26,90,74,0.1); }
+  .form-success-icon { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--teal); display: block; margin-bottom: 12px; }
+  .form-success-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin-bottom: 6px; }
+  .form-success-sub { font-size: 12px; color: rgba(245,240,232,0.5); line-height: 1.8; }
+  @media(max-width:600px){ .form-row { grid-template-columns: 1fr; } .cta-section { padding: 64px 20px; } }
+
+  /* ── FOOTER ── */
+  footer { border-top: 1px solid rgba(184,150,62,0.12); padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: var(--ivory); }
+  .footer-logo span { color: var(--gold); }
+  .footer-links { display: flex; gap: 24px; list-style: none; flex-wrap: wrap; }
+  .footer-links a { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(245,240,232,0.3); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy { font-family: 'Montserrat', sans-serif; font-size: 9px; letter-spacing: 0.1em; color: rgba(245,240,232,0.2); }
+  @media(max-width:600px){ footer { flex-direction: column; align-items: flex-start; padding: 24px 20px; } }
+
+  /* scroll fade */
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div>
+    <a class="logo" href="index.html">Musica <span>Online</span></a>
+    <div class="logo-sub">コンクール主催者向けシステム</div>
+  </div>
+  <a class="nav-cta" href="#contact">無料でお問い合わせ</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">コンクール主催者様へ</p>
+  <h1 class="hero-title">
+    動画審査の<em>面倒な作業</em>を、<br>すべて自動化します。
+  </h1>
+  <p class="hero-subtitle">
+    動画の受け取り・参加費の回収・審査の集計・賞状の作成——<br>
+    これらをすべて自動化するシステムを、初期費用・月額費用ゼロでご提供します。
+  </p>
+  <div class="hero-actions">
+    <a class="btn-gold" href="#contact">無料でお問い合わせ</a>
+    <a class="btn-outline" href="#demo">デモを見る</a>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section style="padding: 80px 40px; max-width: 1000px; margin: 0 auto;">
+  <p class="section-eyebrow fade-up">こんなお悩みはありませんか？</p>
+  <h2 class="section-title fade-up">動画審査コンクールの<br><em>「あるある」課題</em></h2>
+  <div class="pain-grid fade-up">
+    <div class="pain-card">
+      <span class="pain-num">01</span>
+      <h3 class="pain-title">動画の受け取りが煩雑</h3>
+      <p class="pain-desc">GoogleフォームやメールでYouTubeリンクを受け取っているが、管理が大変。ファイル形式・容量のトラブルも絶えない。</p>
+    </div>
+    <div class="pain-card">
+      <span class="pain-num">02</span>
+      <h3 class="pain-title">参加費の回収が手間</h3>
+      <p class="pain-desc">銀行振込の確認・入金照合・未払いの催促に毎回多大な時間がかかる。領収書の発行も個別対応が必要。</p>
+    </div>
+    <div class="pain-card">
+      <span class="pain-num">03</span>
+      <h3 class="pain-title">審査集計・結果発表が面倒</h3>
+      <p class="pain-desc">審査員ごとのExcelを集めて集計→ランキング作成→参加者への個別連絡がすべて手作業。規模が大きいほど負荷が増す。</p>
+    </div>
+    <div class="pain-card">
+      <span class="pain-num">04</span>
+      <h3 class="pain-title">賞状・通知の作成に時間がかかる</h3>
+      <p class="pain-desc">参加者全員の賞状を手作業で作成・送付。毎回数時間〜数日かかっており、回を重ねるほど負担が増している。</p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<div class="solution-wrap">
+  <section style="padding: 80px 40px; max-width: 1000px; margin: 0 auto;">
+    <p class="section-eyebrow fade-up">Musica Online が解決します</p>
+    <h2 class="section-title fade-up" style="color: var(--ivory);">これらすべてを<em>自動化</em>します</h2>
+    <div class="solution-grid fade-up">
+      <div class="sol-card">
+        <span class="sol-icon">♩</span>
+        <h3 class="sol-title">動画受付・決済を自動化</h3>
+        <p class="sol-desc">参加者が専用ページから動画をアップロード。参加費はクレジットカード・PayPayで自動決済。振込確認も領収書発行も不要です。</p>
+      </div>
+      <div class="sol-card">
+        <span class="sol-icon">♪</span>
+        <h3 class="sol-title">審査・集計・発表を自動化</h3>
+        <p class="sol-desc">審査員は専用ポータルで動画視聴・採点・講評入力。スコアは自動集計され、ランキングと講評が参加者に自動通知されます。</p>
+      </div>
+      <div class="sol-card">
+        <span class="sol-icon">♫</span>
+        <h3 class="sol-title">賞状PDFを自動生成</h3>
+        <p class="sol-desc">受賞・入賞者の賞状PDFが自動生成され、参加者がマイページからダウンロード。手作業での賞状作成は不要になります。</p>
+      </div>
+      <div class="sol-card">
+        <span class="sol-icon">♬</span>
+        <h3 class="sol-title">ブランドを維持したまま導入</h3>
+        <p class="sol-desc">貴団体のロゴ・カラー・コンクール名を設定した専用ページを発行。「主催者名.musica-online.jp」のURLで独立して運営できます。</p>
+      </div>
+      <div class="sol-card">
+        <span class="sol-icon">♩</span>
+        <h3 class="sol-title">審査員は引き続き貴団体で選定</h3>
+        <p class="sol-desc">審査員の選定・手配はすべて主催者様にお任せします。Musica Online は審査の内容に一切関与しません。</p>
+      </div>
+      <div class="sol-card">
+        <span class="sol-icon">♪</span>
+        <h3 class="sol-title">スマートフォン対応・SSL完備</h3>
+        <p class="sol-desc">参加者・審査員ともにスマートフォンから操作可能。通信は暗号化されており、個人情報・決済情報は安全に保護されます。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- PRICING -->
+<section id="pricing" style="padding: 80px 40px;">
+  <div class="pricing-hero fade-up">
+    <p class="section-eyebrow" style="justify-content: center;">料金について</p>
+    <div class="price-big">0円</div>
+    <p class="price-sub">初期費用・月額費用</p>
+    <p style="font-size: 13px; color: rgba(245,240,232,0.5); margin-top: 16px; line-height: 1.9;">
+      開催が成立し、参加費収入が発生した場合のみ<br>
+      <strong style="color: var(--gold); font-weight: 400;">参加費収入の10%</strong>を手数料としていただきます。
+    </p>
+  </div>
+
+  <!-- 標準 / 別途費用 -->
+  <div style="max-width: 760px; margin: 40px auto; display: grid; grid-template-columns: 1fr 1fr; gap: 2px;" class="fade-up">
+    <div style="background: rgba(26,90,74,0.08); border: 1px solid rgba(26,90,74,0.25); padding: 28px;">
+      <p style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:var(--teal); margin-bottom:16px;">標準機能（10%に含まれるもの）</p>
+      <ul style="list-style:none; font-size:12px; line-height:2; color:rgba(245,240,232,0.7);">
+        <li>✓　動画アップロード受付</li>
+        <li>✓　クレジットカード・PayPay決済</li>
+        <li>✓　審査員専用ポータル</li>
+        <li>✓　スコア自動集計・ランキング生成</li>
+        <li>✓　結果通知メールの自動送信</li>
+        <li>✓　賞状PDFの自動生成</li>
+        <li>✓　専用URL・ロゴ・カラー設定</li>
+        <li>✓　スマートフォン対応・SSL</li>
+      </ul>
+    </div>
+    <div style="background: rgba(139,42,42,0.06); border: 1px solid rgba(139,42,42,0.2); padding: 28px;">
+      <p style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:0.2em; text-transform:uppercase; color:rgba(139,42,42,0.8); margin-bottom:16px;">別途費用・要相談（パッケージ外）</p>
+      <ul style="list-style:none; font-size:12px; line-height:2; color:rgba(245,240,232,0.5);">
+        <li>→　既存ドメインへの紐付け</li>
+        <li>→　既存サイトへの埋め込み</li>
+        <li>→　採点項目のカスタマイズ</li>
+        <li>→　デザインの大幅変更</li>
+        <li>→　その他個別ご要望</li>
+      </ul>
+      <p style="font-size:10px; color:rgba(245,240,232,0.3); margin-top:16px; line-height:1.7;">※ まずはご相談ください。追加費用なしで対応できる場合もあります。</p>
+    </div>
+  </div>
+
+  <!-- シミュレーション -->
+  <div class="sim-wrap fade-up">
+    <p style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:rgba(245,240,232,0.3); text-align:center; margin-bottom:16px;">手数料シミュレーション（参加費¥5,000の場合）</p>
+    <table class="sim-table">
+      <thead>
+        <tr>
+          <th>参加者数</th>
+          <th>参加費収入</th>
+          <th>手数料 10%</th>
+          <th>主催者様の手取り</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>30名</td><td>¥150,000</td><td>¥15,000</td><td class="highlight">¥135,000</td></tr>
+        <tr><td>50名</td><td>¥250,000</td><td>¥25,000</td><td class="highlight">¥225,000</td></tr>
+        <tr><td>100名</td><td>¥500,000</td><td>¥50,000</td><td class="highlight">¥450,000</td></tr>
+        <tr><td>200名</td><td>¥1,000,000</td><td>¥100,000</td><td class="highlight">¥900,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" style="padding: 80px 40px;">
+  <div style="max-width:900px; margin:0 auto;">
+    <p class="section-eyebrow fade-up">実際の画面を確認できます</p>
+    <h2 class="section-title fade-up">デモサイトで<em>体験</em>してください</h2>
+    <div class="demo-grid fade-up">
+      <a class="demo-card" href="demo/index.html" target="_blank">
+        <p class="demo-card-label">トップページ</p>
+        <h3 class="demo-card-title">参加者向けLP</h3>
+        <p class="demo-card-desc">コンクールの概要・参加方法・部門一覧・審査員紹介を表示するトップページです。</p>
+        <span class="demo-card-arrow">見てみる →</span>
+      </a>
+      <a class="demo-card" href="demo/music-competition-mypage.html" target="_blank">
+        <p class="demo-card-label">参加者画面</p>
+        <h3 class="demo-card-title">マイページ・動画アップロード</h3>
+        <p class="demo-card-desc">参加者がエントリー・動画提出・結果確認・賞状ダウンロードを行う画面です。</p>
+        <span class="demo-card-arrow">見てみる →</span>
+      </a>
+      <a class="demo-card" href="demo/music-competition-judge.html" target="_blank">
+        <p class="demo-card-label">審査員画面</p>
+        <h3 class="demo-card-title">審査員ポータル</h3>
+        <p class="demo-card-desc">審査員が動画視聴・採点・講評入力を行う専用ポータルです。スライダーで直感的に操作できます。</p>
+        <span class="demo-card-arrow">見てみる →</span>
+      </a>
+      <a class="demo-card" href="demo/music-competition-ranking.html" target="_blank">
+        <p class="demo-card-label">結果発表画面</p>
+        <h3 class="demo-card-title">ランキング・結果発表</h3>
+        <p class="demo-card-desc">1〜3位のポディウム表示・4〜5位入賞の表示・賞状ダウンロード（マイページから）の画面です。</p>
+        <span class="demo-card-arrow">見てみる →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<div style="border-top: 1px solid rgba(184,150,62,0.12); border-bottom: 1px solid rgba(184,150,62,0.12);">
+  <section style="padding: 80px 40px; max-width: 1000px; margin: 0 auto;">
+    <p class="section-eyebrow fade-up">導入の流れ</p>
+    <h2 class="section-title fade-up">最短<em>2週間</em>で導入できます</h2>
+    <div class="flow-grid fade-up">
+      <div class="flow-step">
+        <span class="flow-num">1</span>
+        <h3 class="flow-title">お問い合わせ</h3>
+        <p class="flow-desc">下記フォームよりご連絡ください。現在の運営状況をお聞かせください。</p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-num">2</span>
+        <h3 class="flow-title">オンラインでご説明</h3>
+        <p class="flow-desc">30分ほどのオンラインミーティングにてシステムの詳細をご説明します。</p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-num">3</span>
+        <h3 class="flow-title">設定・カスタマイズ</h3>
+        <p class="flow-desc">ロゴ・カラー・コンクール名・参加費などを設定し、専用ページを作成します。</p>
+      </div>
+      <div class="flow-step">
+        <span class="flow-num">4</span>
+        <h3 class="flow-title">公開・開催</h3>
+        <p class="flow-desc">設定完了後すぐに公開可能。初回開催のサポートもいたします。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CTA / FORM -->
+<section id="contact" class="cta-section">
+  <p class="section-eyebrow fade-up" style="justify-content:center;">お問い合わせ</p>
+  <h2 class="cta-title fade-up">まずは<em>お気軽に</em>ご相談ください</h2>
+  <p class="cta-sub fade-up">初期費用・月額費用は一切かかりません。資料のご送付・デモのご説明も無料です。</p>
+
+  <div class="form-wrap fade-up">
+    <div id="contact-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">団体名・教室名 <span style="color:var(--gold)">*</span></label>
+          <input class="form-input" type="text" id="org-name" placeholder="例：○○音楽協会" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ご担当者名 <span style="color:var(--gold)">*</span></label>
+          <input class="form-input" type="text" id="contact-name" placeholder="例：山田 太郎" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">メールアドレス <span style="color:var(--gold)">*</span></label>
+        <input class="form-input" type="email" id="contact-email" placeholder="example@email.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">現在の動画審査の受け付け方法</label>
+        <select class="form-select" id="current-method">
+          <option value="">— 選択してください —</option>
+          <option>Googleフォーム</option>
+          <option>メール（YouTubeリンク等）</option>
+          <option>その他のフォームサービス</option>
+          <option>動画審査はまだ行っていない</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">年間のコンクール開催回数・参加者数（目安）</label>
+        <input class="form-input" type="text" id="scale" placeholder="例：年2回・各50〜100名程度">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ご質問・ご要望など</label>
+        <textarea class="form-textarea" id="message" placeholder="現在の課題・気になる点・ご要望などをお気軽にご記入ください。"></textarea>
+      </div>
+      <button class="form-submit" onclick="submitForm()">お問い合わせを送信する</button>
+      <p class="form-note">送信後、2営業日以内にご連絡いたします。</p>
+    </div>
+
+    <div class="form-success" id="form-success">
+      <span class="form-success-icon">✓</span>
+      <h3 class="form-success-title">お問い合わせを受け付けました</h3>
+      <p class="form-success-sub">
+        2営業日以内にご連絡いたします。<br>
+        資料をご希望の場合は合わせてお送りします。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Musica <span>Online</span></div>
+  <ul class="footer-links">
+    <li><a href="demo/index.html">参加者トップ</a></li>
+    <li><a href="#pricing">料金</a></li>
+    <li><a href="#demo">デモ</a></li>
+    <li><a href="#contact">お問い合わせ</a></li>
+  </ul>
+  <p class="footer-copy">© 2025 Musica Online.</p>
+</footer>
+
+<script>
+  // scroll fade
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+  // Formspree送信
+  async function submitForm() {
+    const org   = document.getElementById('org-name').value.trim();
+    const name  = document.getElementById('contact-name').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    if (!org || !name || !email) {
+      alert('団体名・ご担当者名・メールアドレスは必須です。');
+      return;
+    }
+    const btn = document.querySelector('.form-submit');
+    btn.textContent = '送信中...'; btn.disabled = true;
+
+    const data = {
+      org_name:       org,
+      contact_name:   name,
+      email:          email,
+      current_method: document.getElementById('current-method').value,
+      scale:          document.getElementById('scale').value,
+      message:        document.getElementById('message').value,
+    };
+
+    try {
+      const res = await fetch('https://formspree.io/f/mzdydoql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        document.getElementById('contact-form').style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+      } else {
+        alert('送信に失敗しました。時間をおいて再度お試しください。');
+        btn.textContent = 'お問い合わせを送信する'; btn.disabled = false;
+      }
+    } catch (e) {
+      alert('通信エラーが発生しました。時間をおいて再度お試しください。');
+      btn.textContent = 'お問い合わせを送信する'; btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
